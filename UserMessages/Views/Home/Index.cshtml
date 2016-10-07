@@ -1,0 +1,21 @@
+﻿@model IEnumerable<UserMessages.Models.User>
+
+@{
+    ViewBag.Title = "Index";
+}
+<div>
+<h2>Пользователи</h2>
+    <table>
+        <tr class="page-header">
+            <td><p>Имя</p></td>
+            <td><p>Идентификатор</p></td>
+        </tr>
+        @foreach (UserMessages.Models.User item in Model)
+        {
+            <tr>
+                <td><p>@item.Name</p></td>
+                <td><p>@item.Id</p></td>
+            </tr>
+        }
+    </table>
+</div>
