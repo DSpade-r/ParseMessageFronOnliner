@@ -26,18 +26,8 @@ namespace UserMessages.Infrastructure
         public List<NodeOfParse> ParseHtmlOnliner(ParseInfo parseInfo)
         {
             List<NodeOfParse> Nodes = new List<NodeOfParse>();
-            WebClient web = new WebClient();
-            //адрес html
-            string url = web.DownloadString("http://forum.onliner.by/viewtopic.php?t=16513761&start=0");
-            //создаю экземпляр класса
-            HtmlDocument document = new HtmlDocument();            
-            //Загружаю в класс(парсер) наш html
-            document.LoadHtml(url);            
-            var ul = document.DocumentNode.SelectSingleNode("//ul[@class='b-messages-thread']");
-            var liList = ul.SelectNodes("descendant::li")               //выбираю все элементы li
-                .Where(li => (li.Attributes.Count > 1))                 //у которых атрибутов больше 2
-                .Where(li => li.Attributes[1].Value.Contains("msgpost"))//и второй атрибу содержит слово msgpost
-                .Select(li => li).ToList();
+            //получаю коллекцию постов на странице из parseInfo
+            var liList = GetPostNode(parseInfo);
             //просматриваю все посты и записываю те, которые удовлетворяют условию
             foreach (var node in liList)
             {
@@ -63,19 +53,67 @@ namespace UserMessages.Infrastructure
                 }
             }
             return Nodes;
+        }        
+        //метод определения коллекции постов по адресу страницы из parseInfo
+        public List<HtmlNode> GetPostNode(ParseInfo parseInfo)
+        {
+            WebClient web = new WebClient();
+            //адрес html
+            string url = web.DownloadString(parseInfo.url);
+            //создаю экземпляр класса
+            HtmlDocument document = new HtmlDocument();
+            //Загружаю в класс(парсер) наш html
+            document.LoadHtml(url);
+            var ul = document.DocumentNode.SelectSingleNode("//ul[@class='b-messages-thread']");
+            var liList = ul.SelectNodes("descendant::li")               //выбираю все элементы li
+                .Where(li => (li.Attributes.Count > 1))                 //у которых атрибутов больше 2
+                .Where(li => li.Attributes[1].Value.Contains("msgpost"))//и второй атрибут содержит слово msgpost
+                .Select(li => li).ToList();   
+            //возвращаю коллекцию постов на странице parseInfo.url        
+            return liList;
         }
         //метод изъятия текста сообщения
         public string GetMessage(HtmlNode node)
         {
-            var message = node.Descendants().
-                    Where(div => div.GetAttributeValue("class", "").Equals("b-msgpost-txt")).Single().
-                    Descendants().
-                    Where(div => div.GetAttributeValue("class", "").Equals("b-msgpost-txt-i")).Single().
-                    Descendants().
-                    Where(div => div.GetAttributeValue("class", "").Equals("content")).Single().
-                    SelectSingleNode("big").
-                    SelectSingleNode("span").
-                    SelectSingleNode("a").InnerText;
+            //блок <div class= "content"> является нашим сообщением
+            var message = node.SelectNodes("descendant::div").
+                Where(div => div.Attributes.Count > 1 &&
+                div.Attributes[0].Value.Contains("content")).
+                Select(div => div).ToList();
+            //теперь необходимо удалить ненужные классы и модифицировать
+            //ссылку на смайлики:)
+            ModNode(message[0]);
+            string htmlMessage = message[0].InnerHtml;
+            byte[] bytes = Encoding.Default.GetBytes(htmlMessage);
+            htmlMessage = Encoding.UTF8.GetString(bytes);
+            //var smileNode = message.SelectNodes("img").Where(src => src.Attributes[])
+            return null;
+        }
+        //метод рекурсивного перебора всех элементов сообщения и удаления ненужных атрибутов
+        //нужные атрибуты:
+        // src и href для смайликов и ссылок
+        public void ModNode(HtmlNode nodeForMod)
+        {         
+            //проверяю на наличие "нужных атрибутов" и удаляю ненужные  
+            for (int currAttr = 0; currAttr < nodeForMod.Attributes.Count; currAttr++)
+            {
+                //с ссылками ничего делать не приходится - они оригинальные и рабочие
+                //к рисункам смайликов придется модифицировать путь, так как у нас он внутренний(относительно)
+                //то есть например вместо ./images/smilies/molotok.gif стоит подставить http://forum.onliner.by/images/smilies/molotok.gif
+                if (nodeForMod.Attributes[currAttr].Name == "src")
+                {
+                    nodeForMod.Attributes[currAttr].Value = nodeForMod.Attributes[currAttr].Value.Replace(@"./images/smilies", @"http://forum.onliner.by/images");
+                    continue;
+                }
+                if (nodeForMod.Attributes[currAttr].Name == "href") continue;
+                nodeForMod.Attributes.RemoveAt(currAttr);   //удаление атрибута(с концами:))
+                currAttr--; //счетчик назад так как атрибут удален полностью(чтобы не пропустить след по логике)                
+            }
+            if (!nodeForMod.HasChildNodes) return;
+            for (int currChild = 0; currChild < nodeForMod.ChildNodes.Count; currChild++)
+            {
+                ModNode(nodeForMod.ChildNodes[currChild]);
+            }   
         }
     }
 }

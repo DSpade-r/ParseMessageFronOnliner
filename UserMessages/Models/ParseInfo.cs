@@ -11,5 +11,6 @@ namespace UserMessages.Models
         public int UserID { set; get; }
         public int MaxMessage { set; get; }
         public int PageCount { set; get; }
+        public string url { set; get; }
     }
 }

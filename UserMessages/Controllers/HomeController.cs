@@ -19,9 +19,9 @@ namespace UserMessages.Controllers
         // GET: Home
         public ActionResult Index()
         {
-            HtmAgilityParser parser = new HtmAgilityParser();
-            ParseInfo parseInfo = new ParseInfo { UserID = 0, MaxMessage=20, Name = "DSpade", PageCount=1};
-            List<NodeOfParse> result = parser.ParseHtmlOnliner(parseInfo);
+            //HtmAgilityParser parser = new HtmAgilityParser();
+            //ParseInfo parseInfo = new ParseInfo { UserID = 0, MaxMessage=20, Name = "DSpade", PageCount=1};
+            //List<NodeOfParse> result = parser.ParseHtmlOnliner(parseInfo);
             return View(db.Users);
         }
     }
