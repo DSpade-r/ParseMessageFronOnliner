@@ -53,7 +53,8 @@ namespace UserMessages.Infrastructure
                 }
             }
             return Nodes;
-        }        
+        }  
+        //метод       
         //метод определения коллекции постов по адресу страницы из parseInfo
         public List<HtmlNode> GetPostNode(ParseInfo parseInfo)
         {
@@ -86,8 +87,9 @@ namespace UserMessages.Infrastructure
             string htmlMessage = message[0].InnerHtml;
             byte[] bytes = Encoding.Default.GetBytes(htmlMessage);
             htmlMessage = Encoding.UTF8.GetString(bytes);
+            htmlMessage = htmlMessage.Trim();
             //var smileNode = message.SelectNodes("img").Where(src => src.Attributes[])
-            return null;
+            return htmlMessage;
         }
         //метод рекурсивного перебора всех элементов сообщения и удаления ненужных атрибутов
         //нужные атрибуты:
@@ -102,7 +104,7 @@ namespace UserMessages.Infrastructure
                 //то есть например вместо ./images/smilies/molotok.gif стоит подставить http://forum.onliner.by/images/smilies/molotok.gif
                 if (nodeForMod.Attributes[currAttr].Name == "src")
                 {
-                    nodeForMod.Attributes[currAttr].Value = nodeForMod.Attributes[currAttr].Value.Replace(@"./images/smilies", @"http://forum.onliner.by/images");
+                    nodeForMod.Attributes[currAttr].Value = nodeForMod.Attributes[currAttr].Value.Replace(@"./images/smilies", @"http://forum.onliner.by/images/smilies");
                     continue;
                 }
                 if (nodeForMod.Attributes[currAttr].Name == "href") continue;
