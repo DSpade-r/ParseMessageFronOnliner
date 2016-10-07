@@ -5,6 +5,8 @@ using System.Net;
 using System;
 using UserMessages.Models;
 using System.Text;
+using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace UserMessages.Infrastructure
 {
@@ -25,7 +27,7 @@ namespace UserMessages.Infrastructure
         //если не все(номер поста записан, текст записан, но не те данные по пользователю - то обнуляем запись и переходим к следующей
         public List<NodeOfParse> ParseHtmlOnliner(ParseInfo parseInfo)
         {
-            List<NodeOfParse> Nodes = new List<NodeOfParse>();
+            List<NodeOfParse> Notes = new List<NodeOfParse>();
             //получаю коллекцию постов на странице из parseInfo
             var liList = GetPostNode(parseInfo);
             //просматриваю все посты и записываю те, которые удовлетворяют условию
@@ -42,6 +44,7 @@ namespace UserMessages.Infrastructure
                 //попровки по кодировке onlinet.by utf-8 использует
                 byte[] bytes = Encoding.Default.GetBytes(author);
                 author = Encoding.UTF8.GetString(bytes);
+                int countNote = 0; //количество записей по автору
                 //проверяю "наш ли клиент":)
                 if (author == parseInfo.Name)
                 {
@@ -49,10 +52,17 @@ namespace UserMessages.Infrastructure
                     //1. id сообщения
                     //2. дата и время сообщения
                     //3. само солбщение
-
+                    if (Notes.Count < parseInfo.MaxMessage)
+                    {
+                        Notes[countNote].Message = GetMessage(node);
+                        Notes[countNote].IdMessage = GetIdMessage(node);
+                        Notes[countNote].NameUser = author;
+                        Notes[countNote].Date = GetDateMessage(node);
+                        Notes[countNote].IdUser = GetUserID(node);
+                    }
                 }
             }
-            return Nodes;
+            return Notes;
         }  
         //метод       
         //метод определения коллекции постов по адресу страницы из parseInfo
@@ -73,6 +83,7 @@ namespace UserMessages.Infrastructure
             //возвращаю коллекцию постов на странице parseInfo.url        
             return liList;
         }
+        #region Изъятие текста сообщения
         //метод изъятия текста сообщения
         public string GetMessage(HtmlNode node)
         {
@@ -117,5 +128,50 @@ namespace UserMessages.Infrastructure
                 ModNode(nodeForMod.ChildNodes[currChild]);
             }   
         }
+        #endregion
+        #region Изъятие номера сообщения
+        public int GetIdMessage(HtmlNode node)
+        {
+            //блок <small class= "msgpost-date"> дает информацию о номере сообщения(Id)
+            var TagWithIdMessage = node.SelectNodes("descendant::small").
+                Where(small => small.Attributes.Count > 1 &&
+                small.Attributes[0].Value.Contains("msgpost-date")).
+                Select(small => small).ToList();
+            return Int32.Parse(TagWithIdMessage[0].Id);
+        }
+        #endregion
+        #region Изъятие даты сообщения
+        public DateTime GetDateMessage(HtmlNode node)
+        {
+            //блок <small class= "msgpost-date"> дает информацию о номере сообщения(Id)
+            var TagWithIdMessage = node.SelectNodes("descendant::small").
+                Where(small => small.Attributes.Count > 1 &&
+                small.Attributes[0].Value.Contains("msgpost-date")).
+                Select(small => small).ToList();
+            string innerDate = TagWithIdMessage[0].SelectSingleNode("span").InnerText;
+            //получаю русские символы
+            byte[] bytes = Encoding.Default.GetBytes(innerDate);
+            innerDate = Encoding.UTF8.GetString(bytes);   
+            //получаю год из строки и добавляю к нему "г."
+            //это необходимо для приведения к региональному формату         
+            string year = Regex.Match(innerDate, @"\b\d{4}\b").Value;
+            innerDate = innerDate.Replace(year, year + " г.");
+            //конвертирую дату в формат DateTime(для удобства использования)
+            DateTime innerDateDT = DateTime.ParseExact(innerDate, "f", CultureInfo.CreateSpecificCulture("ru-RU"));
+            return innerDateDT; 
+        }
+        #endregion
+        #region Изъятие идентификатора пользователя
+        public int GetUserID(HtmlNode node)
+        {
+            //блок <small class= "msgpost-date"> дает информацию о номере сообщения(Id)
+            var TagWithIdMessage = node.SelectNodes("descendant::div").
+                Where(div => div.Attributes.Count > 1 &&
+                div.Attributes[0].Value.Contains("b-mtauthor")).
+                Select(div => div).ToList();
+            string userID = TagWithIdMessage[0].Attributes[1].Value;
+            return Int32.Parse(userID);
+        }
+        #endregion
     }
 }
