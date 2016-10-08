@@ -60,11 +60,7 @@ namespace UserMessages.Tests
             ParseInfo parseInfoTest = new ParseInfo { MaxMessage = 4, Name = "1", PageCount = 1, UserID = 1, url = @"http://forum.onliner.by/viewtopic.php?t=1863541&start=8340" };
             List<HtmlNode> listNode = parser.GetPostNode(parseInfoTest);
             DateTime testDate = new DateTime(2012, 10, 28, 18, 44, 00);
-            //CultureInfo ci = CultureInfo.CreateSpecificCulture("ru-RU");
-            //ci.DateTimeFormat.YearMonthPattern = "MMMM YYYY";
-            //string innerDate = testDate.ToString("f", ci);
-            //DateTime innerDateDT = DateTime.ParseExact(innerDate, "f", CultureInfo.CreateSpecificCulture("ru-RU"));
-            //Act
+            //Act            
             DateTime messageDate = parser.GetDateMessage(listNode[13]);
             //Assert
             Assert.AreEqual(messageDate, testDate);

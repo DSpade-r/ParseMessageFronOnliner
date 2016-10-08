@@ -151,13 +151,8 @@ namespace UserMessages.Infrastructure
             string innerDate = TagWithIdMessage[0].SelectSingleNode("span").InnerText;
             //получаю русские символы
             byte[] bytes = Encoding.Default.GetBytes(innerDate);
-            innerDate = Encoding.UTF8.GetString(bytes);   
-            //получаю год из строки и добавляю к нему "г."
-            //это необходимо для приведения к региональному формату         
-            string year = Regex.Match(innerDate, @"\b\d{4}\b").Value;
-            innerDate = innerDate.Replace(year, year + " г.");
-            //конвертирую дату в формат DateTime(для удобства использования)
-            DateTime innerDateDT = DateTime.ParseExact(innerDate, "f", CultureInfo.CreateSpecificCulture("ru-RU"));
+            innerDate = Encoding.UTF8.GetString(bytes);          
+            DateTime innerDateDT = DateTime.ParseExact(innerDate, "dd MMMM yyyy HH:mm", CultureInfo.CreateSpecificCulture("ru-RU"));
             return innerDateDT; 
         }
         #endregion
