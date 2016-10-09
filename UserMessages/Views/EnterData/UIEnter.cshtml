@@ -1,0 +1,13 @@
+﻿@model UserMessages.Models.ParseInfo
+@{
+    ViewBag.Title = "UIEnter";
+}
+@using (Html.BeginForm())
+{
+    <h1>Введите данные для поиска</h1>
+    <p>Страница, с которой начать поиск: @Html.TextBoxFor(x => x.url)</p>
+    <p>Ник пользователя, чьи сообщения искать: @Html.TextBoxFor(x => x.Name)</p>
+    <p>Количество просматриваемых страниц форума: @Html.TextBoxFor(x => x.PageCount)</p>
+    <p>Максимальное количество принимаемых сообщений: @Html.TextBoxFor(x => x.MaxMessage)</p>
+    <input type="submit" value="Начать сканирование" />
+}
