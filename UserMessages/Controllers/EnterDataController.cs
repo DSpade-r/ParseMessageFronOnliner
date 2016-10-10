@@ -26,7 +26,7 @@ namespace UserMessages.Controllers
             {
                 HtmAgilityParser parser = new HtmAgilityParser();
                 List<NodeOfParse> Notes = parser.ParseHtmlOnliner(parseInfo);
-                List<Message> messages = new List<Message>();            
+                List<Message> messages = new List<Message>();                       
                 for (int currMsg = 0; currMsg < Notes.Count; currMsg++)
                 {
                     Message message = new Message()
@@ -36,18 +36,22 @@ namespace UserMessages.Controllers
                         UserId = Notes[currMsg].IdUser,
                         Text = Notes[currMsg].Message
                     };
-                    messages.Add(message);
-                    //db.Messages.Add(message);
-                    //db.SaveChanges();
-                }
-                db.Messages.AddRange(messages);
+                    //проверка на наличие в базе такого сообщения
+                    if (db.Messages.Find(message.Id) == null)
+                    {
+                        db.Messages.Add(message);
+                        messages.Add(message);
+                    }                                   
+                }              
                 User user = new User()
                 {
                     Id = Notes[0].IdUser,
                     Name = parseInfo.Name,
                     Messages = messages
                 };
-                db.Users.Add(user);
+                //если такой пользователь есть - не добавляем
+                if (db.Users.Find(user.Id) == null)
+                    db.Users.Add(user);
                 db.SaveChanges();
             }
             return View();
