@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data.Entity;
-using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 using UserMessages.Infrastructure;
 using UserMessages.Models;
@@ -15,7 +12,7 @@ namespace UserMessages.Controllers
         // GET: EnterData
         [HttpGet]
         public ActionResult UIEnter()
-        {
+        {  
             return View();
         }
         [HttpPost]

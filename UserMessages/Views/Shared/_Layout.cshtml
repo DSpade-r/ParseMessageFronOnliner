@@ -18,7 +18,7 @@
                     <span class="icon-bar"></span>
                 </button>*@
                 @Html.ActionLink("Парсинг сообщений на форуме", "UIEnter", "EnterData", null, new { @class = "navbar-brand" })
-                @Html.ActionLink("Просмотр сообщений из БД", "Index", "Home", null, new { @class = "navbar-brand" })
+                @Html.ActionLink("Просмотр сообщений из БД", "ViewBase", "Messages", null, new { @class = "navbar-brand" })
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
@@ -26,7 +26,6 @@
             </div>
         </div>
     </div>
-
     <div class="container body-content">
         @RenderBody()
         <hr />

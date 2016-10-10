@@ -4,10 +4,43 @@
 }
 @using (Html.BeginForm())
 {
-    <h1>Введите данные для поиска</h1>
-    <p>Страница, с которой начать поиск: @Html.TextBoxFor(x => x.url)</p>
-    <p>Ник пользователя, чьи сообщения искать: @Html.TextBoxFor(x => x.Name)</p>
-    <p>Количество просматриваемых страниц форума: @Html.TextBoxFor(x => x.PageCount)</p>
-    <p>Максимальное количество принимаемых сообщений: @Html.TextBoxFor(x => x.MaxMessage)</p>
-    <input type="submit" value="Начать сканирование" />
+    <div class="form-horizontal">
+        <h3>Введите данные для поиска</h3>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.LabelFor(model => model.url, "Страница, с которой начать поиск(полный путь):", htmlAttributes: new { @class = "control-label col-md-5" } )
+            <div class="col-md-7">
+                @Html.EditorFor(model => model.url, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.url, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.Name, "Ник пользователя, чьи сообщения искать:", htmlAttributes: new { @class = "control-label col-md-5" })
+            <div class="col-md-7">
+                @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.PageCount, "Количество просматриваемых страниц форума:", htmlAttributes: new { @class = "control-label col-md-5" })
+            <div class="col-md-7">
+                @Html.EditorFor(model => model.PageCount, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.PageCount, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.MaxMessage, "Максимальное количество принимаемых сообщений:", htmlAttributes: new { @class = "control-label col-md-5" })
+            <div class="col-md-7 tex">
+                @Html.EditorFor(model => model.MaxMessage, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.MaxMessage, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Начать сканирование" class="btn btn-default"/>
+        </div>
+    </div>
 }
+<script src="~/Scripts/jquery-1.10.2.min.js"></script>
+<script src="~/Scripts/jquery.validate.min.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
