@@ -18,7 +18,7 @@ namespace UserMessages.Controllers
         [HttpPost]
         public ActionResult UIEnter(ParseInfo parseInfo)
         {
-            Database.SetInitializer(new DropCreateDatabaseAlways<OnlinerForum>());
+            Database.SetInitializer(new DropCreateDatabaseIfModelChanges<OnlinerForum>());
             using (OnlinerForum db = new OnlinerForum())
             {
                 HtmAgilityParser parser = new HtmAgilityParser();
@@ -39,17 +39,21 @@ namespace UserMessages.Controllers
                         db.Messages.Add(message);
                         messages.Add(message);
                     }                                   
-                }              
-                User user = new User()
+                }
+                //если нечего добавлять
+                if (Notes.Count != 0)
                 {
-                    Id = Notes[0].IdUser,
-                    Name = parseInfo.Name,
-                    Messages = messages
-                };
-                //если такой пользователь есть - не добавляем
-                if (db.Users.Find(user.Id) == null)
-                    db.Users.Add(user);
-                db.SaveChanges();
+                    User user = new User()
+                    {
+                        Id = Notes[0].IdUser,
+                        Name = parseInfo.Name,
+                        Messages = messages
+                    };
+                    //если такой пользователь есть - не добавляем
+                    if (db.Users.Find(user.Id) == null)
+                        db.Users.Add(user);
+                    db.SaveChanges();
+                }
             }
             return View();
         }

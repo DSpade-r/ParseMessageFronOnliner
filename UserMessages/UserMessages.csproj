@@ -161,8 +161,10 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Infrastructure\Downloader.cs" />
     <Compile Include="Infrastructure\HtmAgilityParser.cs" />
     <Compile Include="Infrastructure\NodeOfParse.cs" />
+    <Compile Include="Infrastructure\Parser.cs" />
     <Compile Include="Models\Message.cs" />
     <Compile Include="Models\OnlinerForum.cs" />
     <Compile Include="Models\ParseInfo.cs" />
