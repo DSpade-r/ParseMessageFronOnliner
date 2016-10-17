@@ -19,7 +19,7 @@ namespace UserMessages.Tests
             Downloader downloader = new Downloader();
             Parser parser = new Parser();
             ParseInfo parseInfoTest = new ParseInfo { MaxMessage = 4, Name = "1", PageCount = 1, UserID = 1, url = @"http://forum.onliner.by/viewtopic.php?t=1863541&start=8340" };
-            List<HtmlNode> listNode =  downloader.GetPostNode(parseInfoTest);
+            List<HtmlNode> listNode = parser.GetPostNode(downloader.DounloadHtml(parseInfoTest.url));
             //Act
             string testString = @"<p>а что слышна про дом№8???? <img src=""http://forum.onliner.by/images/smilies/confused.gif""></p>";
             string message = parser.GetMessage(listNode[14]);
@@ -34,7 +34,7 @@ namespace UserMessages.Tests
             Downloader downloader = new Downloader();
             Parser parser = new Parser();
             ParseInfo parseInfoTest = new ParseInfo { MaxMessage = 4, Name = "1", PageCount = 1, UserID = 1, url = @"http://forum.onliner.by/viewtopic.php?t=1863541&start=8340" };
-            List<HtmlNode> listNode = downloader.GetPostNode(parseInfoTest);
+            List<HtmlNode> listNode = parser.GetPostNode(downloader.DounloadHtml(parseInfoTest.url));
             //Act
             string testString = @"<p><strong>Garik_p</strong>, <a href=""http://ru.homestyler.com/designer""><!-- u -->И ничего качать не надо.<!-- u --></a></p>";
             string message = parser.GetMessage(listNode[12]);
@@ -48,7 +48,7 @@ namespace UserMessages.Tests
             Downloader downloader = new Downloader();
             Parser parser = new Parser();
             ParseInfo parseInfoTest = new ParseInfo { MaxMessage = 4, Name = "1", PageCount = 1, UserID = 1, url = @"http://forum.onliner.by/viewtopic.php?t=1863541&start=8340" };
-            List<HtmlNode> listNode = downloader.GetPostNode(parseInfoTest);
+            List<HtmlNode> listNode = parser.GetPostNode(downloader.DounloadHtml(parseInfoTest.url));
             int testId = 42122394;
             //Act
             int messageID = parser.GetIdMessage(listNode[13]);
@@ -62,7 +62,7 @@ namespace UserMessages.Tests
             Downloader downloader = new Downloader();
             Parser parser = new Parser();
             ParseInfo parseInfoTest = new ParseInfo { MaxMessage = 4, Name = "1", PageCount = 1, UserID = 1, url = @"http://forum.onliner.by/viewtopic.php?t=1863541&start=8340" };
-            List<HtmlNode> listNode = downloader.GetPostNode(parseInfoTest);
+            List<HtmlNode> listNode = parser.GetPostNode(downloader.DounloadHtml(parseInfoTest.url));
             DateTime testDate = new DateTime(2012, 10, 28, 18, 44, 00);
             //Act            
             DateTime messageDate = parser.GetDateMessage(listNode[13]);
@@ -76,7 +76,7 @@ namespace UserMessages.Tests
             Downloader downloader = new Downloader();
             Parser parser = new Parser();
             ParseInfo parseInfoTest = new ParseInfo { MaxMessage = 4, Name = "1", PageCount = 1, UserID = 1, url = @"http://forum.onliner.by/viewtopic.php?t=1863541&start=8340" };
-            List<HtmlNode> listNode = downloader.GetPostNode(parseInfoTest);
+            List<HtmlNode> listNode = parser.GetPostNode(downloader.DounloadHtml(parseInfoTest.url));
             int testUserId = 496400;
             //Act
             int userId = parser.GetUserID(listNode[13]);
@@ -94,7 +94,7 @@ namespace UserMessages.Tests
             Parser parser = new Parser();
             ParseInfo parseInfoTest = new ParseInfo { MaxMessage = 4, Name = "1", PageCount = 1, UserID = 1, url = @"http://forum.onliner.by/viewtopic.php?t=1863541&start=8340" };
             //Act
-            List<HtmlNode> listNode = downloader.GetPostNode(parseInfoTest);
+            List<HtmlNode> listNode = parser.GetPostNode(downloader.DounloadHtml(parseInfoTest.url));
             int countNode = 21;
             string nameItemOfNode = "li";
             //Assert

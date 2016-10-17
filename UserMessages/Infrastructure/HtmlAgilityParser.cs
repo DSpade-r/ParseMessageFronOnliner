@@ -7,19 +7,26 @@ using UserMessages.Models;
 using System.Text;
 using System.Globalization;
 using System.Text.RegularExpressions;
+using Ninject;
+using UserMessages.Infrastructure.Interfaces;
 
 namespace UserMessages.Infrastructure
 {
-    public class HtmAgilityParser
-    {       
+    public class HtmlAgilityParser : IHtmlParser 
+    {
+        private IDownloader downloader;
+        private IParser parser;
+        public HtmlAgilityParser(IParser parser, IDownloader downloader)
+        {
+            this.parser = parser;
+            this.downloader = downloader;
+        } 
         public List<NodeOfParse> ParseHtmlOnliner(ParseInfo parseInfo)
         {
             List<NodeOfParse> Notes = new List<NodeOfParse>();
-            Downloader downloader = new Downloader();
-            Parser parser = new Parser();
             //цикл для перебора страниц парсинга
             for (int parsePage = 1; parsePage <= parseInfo.PageCount; parsePage++)
-            {
+            {                
                 //формирую url в зависимости от количества необходимых страниц
                 string pattern = @"=\d{1,10}$"; //паттерн для определения количества постов
                 Regex url = new Regex(pattern);
@@ -30,7 +37,7 @@ namespace UserMessages.Infrastructure
                 strNumberPage = "=" + strNumberPage;
                 parseInfo.url = url.Replace(parseInfo.url, strNumberPage); //получаю конечную строку с новым адресом страницы
                 //получаю коллекцию постов на странице из parseInfo
-                var liList = downloader.GetPostNode(parseInfo);
+                var liList = parser.GetPostNode(downloader.DounloadHtml(parseInfo.url));
                 //просматриваю все посты и записываю те, которые удовлетворяют условию
                 foreach (var node in liList)
                 {
@@ -41,10 +48,7 @@ namespace UserMessages.Infrastructure
                         Where(div => div.GetAttributeValue("class", "").Equals("b-mtauthor-i")).Single().
                         SelectSingleNode("big").
                         SelectSingleNode("span").
-                        SelectSingleNode("a").InnerText;
-                    //попровки по кодировке onlinet.by utf-8 использует
-                    byte[] bytes = Encoding.Default.GetBytes(author);
-                    author = Encoding.UTF8.GetString(bytes);
+                        SelectSingleNode("a").InnerText;                    
                     //проверяю "наш ли клиент":)
                     if (author == parseInfo.Name)
                     {
@@ -61,7 +65,7 @@ namespace UserMessages.Infrastructure
                         temp.Message = parser.GetMessage(node);                        
                         temp.NameUser = author;
                         temp.Date = parser.GetDateMessage(node);
-                        temp.IdUser = parser.GetUserID(node);
+                        temp.UserId = parser.GetUserID(node);
                         Notes.Add(temp);                        
                     }
                 }

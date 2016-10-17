@@ -1,15 +1,21 @@
 ﻿using System.Collections.Generic;
 using System.Data.Entity;
+using System.Linq;
 using System.Web.Mvc;
+using UserMessages.DBContext;
 using UserMessages.Infrastructure;
+using UserMessages.Infrastructure.Interfaces;
 using UserMessages.Models;
 
 namespace UserMessages.Controllers
 {
     public class EnterDataController : Controller
-    {        
-        //UserMessageContext db = new UserMessageContext();
-        // GET: EnterData
+    {
+        private IHtmlParser parser;
+        public EnterDataController(IHtmlParser htmlParser)
+        {
+            parser = htmlParser;
+        }
         [HttpGet]
         public ActionResult UIEnter()
         {  
@@ -18,43 +24,58 @@ namespace UserMessages.Controllers
         [HttpPost]
         public ActionResult UIEnter(ParseInfo parseInfo)
         {
-            Database.SetInitializer(new DropCreateDatabaseIfModelChanges<OnlinerForum>());
             using (OnlinerForum db = new OnlinerForum())
             {
-                HtmAgilityParser parser = new HtmAgilityParser();
                 List<NodeOfParse> Notes = parser.ParseHtmlOnliner(parseInfo);
-                List<Message> messages = new List<Message>();                       
-                for (int currMsg = 0; currMsg < Notes.Count; currMsg++)
-                {
-                    Message message = new Message()
-                    {
-                        Id = Notes[currMsg].IdMessage,
-                        DateTime = Notes[currMsg].Date,
-                        UserId = Notes[currMsg].IdUser,
-                        Text = Notes[currMsg].Message
-                    };
-                    //проверка на наличие в базе такого сообщения
-                    if (db.Messages.Find(message.Id) == null)
-                    {
-                        db.Messages.Add(message);
-                        messages.Add(message);
-                    }                                   
-                }
-                //если нечего добавлять
+                List<Message> messages = new List<Message>();
+                User user = new User();
+                //db.Users.Load();                        
+                user = db.Users.FirstOrDefaultAsync(u => u.Id == parseInfo.UserID || u.Name == parseInfo.Name).Result; //нахожу есть ли пользователь в базе                
                 if (Notes.Count != 0)
                 {
-                    User user = new User()
+                    for (int currMsg = 0; currMsg < Notes.Count; currMsg++)
                     {
-                        Id = Notes[0].IdUser,
-                        Name = parseInfo.Name,
-                        Messages = messages
-                    };
-                    //если такой пользователь есть - не добавляем
-                    if (db.Users.Find(user.Id) == null)
+                        Message message = new Message()
+                        {
+                            Id = Notes[currMsg].IdMessage,
+                            DateTime = Notes[currMsg].Date,
+                            UserId = Notes[currMsg].UserId,
+                            Text = Notes[currMsg].Message
+                        };
+                        messages.Add(message);
+                    }
+                    if (user == null) //нет БД Users
+                    {
+                        user = db.Users.Create();
+                        user.Messages = new List<Message>(messages);
+                        user.Id = Notes[0].UserId;
+                        user.Name = parseInfo.Name;
                         db.Users.Add(user);
+                    }
+                    else
+                    {
+                        if (user.Id == 0) //нет пользователя
+                        {
+                            user.Messages = new List<Message>(messages);
+                            user.Id = Notes[0].UserId;
+                            user.Name = parseInfo.Name;
+                            db.Users.Add(user);
+                        }
+                        else
+                        {
+                            foreach (var message in messages)
+                            {
+                                if (user.Messages.All(m => m.Id != message.Id))
+                                {
+                                    user.Messages.Add(message);
+                                }
+                            }
+                            db.Users.Attach(user);
+                        }
+                    }                    
                     db.SaveChanges();
                 }
-            }
+            }        
             return View();
         }
     }

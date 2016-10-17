@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
+using UserMessages.DBContext;
 using UserMessages.Models;
 
 namespace UserMessages.Controllers
@@ -17,8 +18,8 @@ namespace UserMessages.Controllers
         // GET: Messages
         public ActionResult ViewBase()
         {
-            var messages = db.Messages.Include(m => m.User);
-            return View(messages.ToList());
+                var messages = db.Messages.Include(m => m.User);
+                return View(messages.ToList());           
         }
         protected override void Dispose(bool disposing)
         {

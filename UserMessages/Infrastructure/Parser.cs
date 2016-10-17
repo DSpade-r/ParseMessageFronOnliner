@@ -1,13 +1,30 @@
 ﻿using HtmlAgilityPack;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Text;
+using UserMessages.Infrastructure.Interfaces;
+using UserMessages.Models;
 
 namespace UserMessages.Infrastructure
 {
-    public class Parser
+    public class Parser : IParser
     {
+        #region Изятие постов страницы
+        //метод определения коллекции постов по адресу страницы из parseInfo
+        public List<HtmlNode> GetPostNode(HtmlDocument document)
+        {            
+            var ul = document.DocumentNode.SelectSingleNode("//ul[@class='b-messages-thread']");
+            var liList = ul.SelectNodes("descendant::li")               //выбираю все элементы li
+                .Where(li => (li.Attributes.Count > 1) &&               //у которых атрибутов больше 2
+                (li.Attributes[1].Value.Contains("msgpost")))//и второй атрибут содержит слово msgpost
+                .Select(li => li).ToList();
+            //возвращаю коллекцию постов на странице parseInfo.url        
+            return liList;
+        }
+        #endregion
         #region Изъятие текста сообщения
         //метод изъятия текста сообщения
         public string GetMessage(HtmlNode node)
@@ -21,10 +38,7 @@ namespace UserMessages.Infrastructure
             //ссылку на смайлики:)
             ModNode(message[0]);
             string htmlMessage = message[0].InnerHtml;
-            byte[] bytes = Encoding.Default.GetBytes(htmlMessage);
-            htmlMessage = Encoding.UTF8.GetString(bytes);
             htmlMessage = htmlMessage.Trim();
-            //var smileNode = message.SelectNodes("img").Where(src => src.Attributes[])
             return htmlMessage;
         }
         //метод рекурсивного перебора всех элементов сообщения и удаления ненужных атрибутов
@@ -73,10 +87,7 @@ namespace UserMessages.Infrastructure
                 Where(small => small.Attributes.Count > 1 &&
                 small.Attributes[0].Value.Contains("msgpost-date")).
                 Select(small => small).ToList();
-            string innerDate = TagWithIdMessage[0].SelectSingleNode("span").InnerText;
-            //получаю русские символы
-            byte[] bytes = Encoding.Default.GetBytes(innerDate);
-            innerDate = Encoding.UTF8.GetString(bytes);
+            string innerDate = TagWithIdMessage[0].SelectSingleNode("span").InnerText;            
             string[] formats = { "dd MMMM yyyy HH:mm", "d MMMM yyyy HH:mm" };
             DateTime innerDateDT = DateTime.ParseExact(innerDate, formats, CultureInfo.CreateSpecificCulture("ru-RU"), DateTimeStyles.None);
             return innerDateDT;
