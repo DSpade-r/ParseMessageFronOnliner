@@ -5,19 +5,22 @@ using UserMessages.Models;
 using HtmlAgilityPack;
 using System;
 using System.Globalization;
+using UserMessages.Infrastructure.Interfaces;
 
 namespace UserMessages.Tests
 {
     [TestClass]
     public class Test_ParsingPost
-    {    
+    {
+        private IParser parser = new Parser();
+        private IDownloader downloader = new Downloader();                
         //тест на корректность трансформации адреса смайла
         [TestMethod]
         public void Test_ParseMessage_ConvertUrlSmile()
         {
             //Arrange            
-            Downloader downloader = new Downloader();
-            Parser parser = new Parser();
+            //Downloader downloader = new Downloader();
+            //Parser parser = new Parser();
             ParseInfo parseInfoTest = new ParseInfo { MaxMessage = 4, Name = "1", PageCount = 1, UserID = 1, url = @"http://forum.onliner.by/viewtopic.php?t=1863541&start=8340" };
             List<HtmlNode> listNode = parser.GetPostNode(downloader.DounloadHtml(parseInfoTest.url));
             //Act
@@ -31,8 +34,8 @@ namespace UserMessages.Tests
         public void Test_ParseMessage_WithLink()
         {
             //Arrange
-            Downloader downloader = new Downloader();
-            Parser parser = new Parser();
+            //Downloader downloader = new Downloader();
+            //Parser parser = new Parser();
             ParseInfo parseInfoTest = new ParseInfo { MaxMessage = 4, Name = "1", PageCount = 1, UserID = 1, url = @"http://forum.onliner.by/viewtopic.php?t=1863541&start=8340" };
             List<HtmlNode> listNode = parser.GetPostNode(downloader.DounloadHtml(parseInfoTest.url));
             //Act
@@ -45,8 +48,8 @@ namespace UserMessages.Tests
         public void Test_ParseIDMessage()
         {
             //Arrange
-            Downloader downloader = new Downloader();
-            Parser parser = new Parser();
+            //Downloader downloader = new Downloader();
+            //Parser parser = new Parser();
             ParseInfo parseInfoTest = new ParseInfo { MaxMessage = 4, Name = "1", PageCount = 1, UserID = 1, url = @"http://forum.onliner.by/viewtopic.php?t=1863541&start=8340" };
             List<HtmlNode> listNode = parser.GetPostNode(downloader.DounloadHtml(parseInfoTest.url));
             int testId = 42122394;
@@ -59,8 +62,8 @@ namespace UserMessages.Tests
         public void Test_ParseDateMessage()
         {
             //Arrange
-            Downloader downloader = new Downloader();
-            Parser parser = new Parser();
+            //Downloader downloader = new Downloader();
+            //Parser parser = new Parser();
             ParseInfo parseInfoTest = new ParseInfo { MaxMessage = 4, Name = "1", PageCount = 1, UserID = 1, url = @"http://forum.onliner.by/viewtopic.php?t=1863541&start=8340" };
             List<HtmlNode> listNode = parser.GetPostNode(downloader.DounloadHtml(parseInfoTest.url));
             DateTime testDate = new DateTime(2012, 10, 28, 18, 44, 00);
@@ -73,8 +76,8 @@ namespace UserMessages.Tests
         public void Test_ParseUserIdMessage()
         {
             //Arrange
-            Downloader downloader = new Downloader();
-            Parser parser = new Parser();
+            //Downloader downloader = new Downloader();
+            //Parser parser = new Parser();
             ParseInfo parseInfoTest = new ParseInfo { MaxMessage = 4, Name = "1", PageCount = 1, UserID = 1, url = @"http://forum.onliner.by/viewtopic.php?t=1863541&start=8340" };
             List<HtmlNode> listNode = parser.GetPostNode(downloader.DounloadHtml(parseInfoTest.url));
             int testUserId = 496400;
@@ -104,21 +107,21 @@ namespace UserMessages.Tests
         [TestMethod]
         public void Test_ParseHtmlOnliner()
         {
-            //Arrange
-            HtmAgilityParser AgilityParser = new HtmAgilityParser();
+            //HtmlAgilityParser AgilityParser = new HtmlAgilityParser();
+            IHtmlParser htmlParser = new HtmlAgilityParser(parser, downloader);
             ParseInfo parseInfoTest = new ParseInfo { MaxMessage = 20, Name = "DSpade", PageCount = 10, UserID = 1, url = @"http://forum.onliner.by/viewtopic.php?t=1863541&start=16360" };
             NodeOfParse testNote = new NodeOfParse();
             testNote.Date = new DateTime(2016, 09, 22, 21, 24, 00);
             testNote.IdMessage = 91125917;
-            testNote.IdUser = 371661;
+            testNote.UserId = 371661;
             testNote.NameUser = "DSpade";
             testNote.Message = "<p><strong>ирэн-12</strong>, ерунда все это. Не будьте такими пугаными<img src=\"http://forum.onliner.by/images/smilies/icon_smile.gif\"></p>";
             //Act
-            List<NodeOfParse> Notes = AgilityParser.ParseHtmlOnliner(parseInfoTest);
+            List<NodeOfParse> Notes = htmlParser.ParseHtmlOnliner(parseInfoTest);
             //Assert
             Assert.AreEqual(Notes[0].Date, testNote.Date);
             Assert.AreEqual(Notes[0].IdMessage, testNote.IdMessage);
-            Assert.AreEqual(Notes[0].IdUser, testNote.IdUser);
+            Assert.AreEqual(Notes[0].UserId, testNote.UserId);
             Assert.AreEqual(Notes[0].NameUser, testNote.NameUser);
             Assert.AreEqual(Notes[0].Message, testNote.Message);
         }
